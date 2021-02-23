@@ -4,6 +4,7 @@ import (
 	"filespan/meta"
 	"filespan/util"
 	"fmt"
+	"encoding/json"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -63,3 +64,18 @@ func UploadHandler(w http.ResponseWriter,r *http.Request) {
 func UploadSuccessHandler(w http.ResponseWriter,r *http.Request){
 	io.WriteString(w,"Upload finished! ")
 }
+
+// 获取单个文件的元信息
+func GetFileMetaHandler(w http.ResponseWriter,r *http.Request) {
+	r.ParseForm()
+	filehash := r.Form["filehash"][0]
+	fileMeta := meta.GetFileMeta(filehash)
+	data,err := json.Marshal(fileMeta)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.Write(data)
+}
+
+// 文件下载
