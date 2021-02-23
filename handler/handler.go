@@ -79,3 +79,65 @@ func GetFileMetaHandler(w http.ResponseWriter,r *http.Request) {
 }
 
 // 文件下载
+func DownLoadHandler(w http.ResponseWriter,r *http.Request) {
+	r.ParseForm()
+	filehash := r.Form.Get("filehash")
+	fileMeta := meta.GetFileMeta(filehash)
+	f,err := os.Open(fileMeta.Location)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	defer  f.Close()
+	data,err := ioutil.ReadAll(f)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type","application/octect-stream")
+	w.Header().Set("Content-Description","attachment;filename=\""+fileMeta.FileName + "\"")
+	w.Write(data)
+}
+
+
+// 更新元信息(重命名)
+func FileMetaUpdateHandler(w http.ResponseWriter,r *http.Request){
+	r.ParseForm()
+	opType := r.Form.Get("op")
+	fileSha1 := r.Form.Get("filehash")
+	newFileName := r.Form.Get("filename")
+	if opType != "0" {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+	if r.Method != "POST" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	currentFileMeta := meta.GetFileMeta(fileSha1)
+	currentFileMeta.FileName = newFileName
+	meta.UpdateFileMeta(currentFileMeta)
+
+
+	data,err := json.Marshal(currentFileMeta)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write(data)
+}
+
+// 文件元信息删除
+func FileDeletehandler(w http.ResponseWriter,r *http.Request) {
+	r.ParseForm()
+	fileSha1 := r.Form.Get("filehash")
+
+	fMeta := meta.GetFileMeta(fileSha1)
+	os.Remove(fMeta.Location)
+
+	meta.RemoveFileMeta(fileSha1)
+
+	w.WriteHeader(http.StatusOK)
+
+}

@@ -22,3 +22,17 @@ func UpdateFileMeta(filemeta FileMeta) {
 func GetFileMeta(filesha1 string) FileMeta {
 	return fileMetas[filesha1]
 }
+// 批量获取文件元信息列表
+func GetLastFileMetas(count int) []FileMeta {
+	fMetaArray := make([]FileMeta,len(fileMetas))
+	for _,v := range fileMetas {
+		fMetaArray = append(fMetaArray,v)
+	}
+	//sort.Sort(ByUp)
+	return fMetaArray[0:count]
+}
+
+// 删除元信息
+func RemoveFileMeta(filesha1 string) {
+	delete(fileMetas,filesha1)
+}
