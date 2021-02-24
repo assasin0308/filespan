@@ -5,6 +5,7 @@ import (
 	"filespan/util"
 	"fmt"
 	"encoding/json"
+	"golang.org/x/text/date"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -54,7 +55,8 @@ func UploadHandler(w http.ResponseWriter,r *http.Request) {
 		// 计算文件的hash值
 		newfile.Seek(0,0)
 		fileMeta.FileSha1 = util.FileSha1(newfile)
-		meta.UpdateFileMeta(fileMeta)
+		//meta.UpdateFileMeta(fileMeta)
+		_ = meta.UpdateFileMetaDB(fileMeta)
 
 		// 上传结束,重定向
 		http.Redirect(w,r,"/file/upload/success",http.StatusFound)
@@ -69,7 +71,12 @@ func UploadSuccessHandler(w http.ResponseWriter,r *http.Request){
 func GetFileMetaHandler(w http.ResponseWriter,r *http.Request) {
 	r.ParseForm()
 	filehash := r.Form["filehash"][0]
-	fileMeta := meta.GetFileMeta(filehash)
+	//fileMeta := meta.GetFileMeta
+	fileMeta,err := meta.GetFileMetaDB(filehash)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	data,err := json.Marshal(fileMeta)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
