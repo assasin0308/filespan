@@ -5,7 +5,6 @@ import (
 	"filespan/util"
 	"fmt"
 	"encoding/json"
-	"golang.org/x/text/date"
 	"io"
 	"io/ioutil"
 	"net/http"

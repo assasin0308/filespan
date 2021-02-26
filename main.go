@@ -14,6 +14,9 @@ func main() {
 	http.HandleFunc("/file/download",handler.DownLoadHandler)
 	http.HandleFunc("/file/update",handler.FileMetaUpdateHandler)
 	http.HandleFunc("/file/delete",handler.FileDeletehandler)
+
+	// 注册
+	http.HandleFunc("/user/signup",handler.SignupHandler)
 	// 端口监听
 	err := http.ListenAndServe(":8080",nil)
 	if err != nil {
